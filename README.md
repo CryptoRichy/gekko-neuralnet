@@ -1,17 +1,42 @@
-# gekko-neuralnet
-Neural network strategy for Gekko
 
-This strategy was inspired from Mounir's strategy, found on the Gekko Discord channel. 
-For reference, that's the original work: https://github.com/cloggy45/Gekko-Bot-Resources/blob/master/gekko/strategies/mounirs-ga-version-2.js
+# zuki_nn
+Gekkowarez team update:
+
+We've worked with numerous machine learning libraries from Synaptic, Neotaptic and thought we'd take a look at a community Strategy which was created by SirTificate (and based on https://github.com/cloggy45/Gekko-Bot-Resources/blob/master/gekko/strategies/mounirs-ga-version-2.js by Mounir). 
+
+Because we had a bunch of code lying around for storing and retrieving a trained neural net it was pretty quick to add. 
 
 # Install
 copy the file(s) from /strategies/ into the strategies folder of your gekko install
 copy the file(s) from /toml/ into the /config/strategies/ folder of your gekko install
 
 Install the modules in your gekko folder:
-`npm install convnetjs mathjs`
+`npm install convnetjs mathjs`fs
 
 # Usage / Configuration
+
+Add the following section to your config file:
+
+config.filewriter = {
+  nnfilepath: __dirname+"/nn_files/" //encure you have created gekko/nn_files folder
+};
+
+For consoles setup create the following entry in your config file:
+config.zuki_nn = {
+	threshold_buy : 1.0,
+	threshold_sell : -1.0,
+	learning_rate : 0.01,
+	momentum : 0.1,
+	decay : 0.01,
+	stoploss_enabled : false,
+	stoploss_threshold : 0.85,
+	hodl_threshold : 1,
+	price_buffer_len : 100,
+	min_predictions : 1000	
+}
+
+
+If you use the UI then clone / rename it will reference the toml file.
 
 ```javascript
 
@@ -44,10 +69,4 @@ stoploss_threshold = 0.95
 
 ```
 
-If this strategy is useful for you and generates profits. Buy me a coffee, or two:
- 
-ETH 0x40ddba96695bc040ccbe34b4cfa3a7ae8f225583
 
-BTC 1AigkGB4KzzRVmDDxwUxt8EaHRDbtpLNrH
-
-NANO xrb_1iy9ztp485o5a5kumcbazz7178hqmzgcjwbesf73owi7zceaac6jrcgk3w9b
