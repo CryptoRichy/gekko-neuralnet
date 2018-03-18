@@ -36,7 +36,7 @@ config.zuki_nn = {
 }
 
 
-If you use the UI then clone / rename it will reference the toml file.
+If you use the UI then clone / rename it will reference the toml file, only thing you will then need to do is copy in the filewriter config. I don't use the ui so i haven't set that up.
 
 ```javascript
 
