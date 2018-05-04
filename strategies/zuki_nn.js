@@ -7,11 +7,15 @@ var fs = require('fs');
 var log = require('../core/log.js');
 
 var config = require('../core/util.js').getConfig();
-var SMMA = require('./indicators/SMMA.js');
 
-config.filewriter = { nnfilepath: __dirname+"/../nn_files/" };
+var isFilewriterSet = false;
+if (config.hasOwnProperty('filewriter')) {
+  var nndatafile = config.filewriter.nnfilepath+config.filewriter.nnfile; // the nn state needs to be saved between runs this is the location for it
+  isFilewriterSet = true;
+} else {
+  log.info("No filewriter defined in config-file. NN-Data won't be saved.")
+};
 
-var nndatafile = config.filewriter.nnfilepath+'trained.js'; // the nn state needs to be saved between runs this is the location for it
 var d = 5 // Setting the Depth of the neural net?
 
 var strategy = {
@@ -44,16 +48,16 @@ var strategy = {
     this.name = 'Zuki NN';
     this.requiredHistory = config.tradingAdvisor.historySize;
 
-    // smooth the input to reduce the noise of the incoming data
-    this.SMMA = new SMMA(5);
-
     //always create a new instance of convnetjs network
     this.nn = new convnetjs.Net();	
 	
-    if (fs.existsSync(nndatafile)){
-        this.nn.fromJSON(JSON.parse(fs.readFileSync(nndatafile,'utf8')));	
+    log.info("Searching for NN-File in: " + nndatafile);
+    
+    if (isFilewriterSet && fs.existsSync(nndatafile)){
+        this.nn.fromJSON(JSON.parse(fs.readFileSync(nndatafile,'utf8')));
+        log.info("Found File! Loading "+config.filewriter.nnfile); 
     }else{
-
+        log.warn("No NN-File found. Will create new NN-Layer..."); 
         let layers = [
             {type:'input', out_sx:1, out_sy:1, out_depth: d},
             {type:'fc', num_neurons: this.layer_neurons, activation: this.layer_activation},
@@ -111,7 +115,7 @@ var strategy = {
       (candle.volume / 1000)
     ]);
 
-     for (i=0;i<3;++i)
+    for (i=0;i<3;++i)
       this.learn();
 
     if ((d * 2) > this.priceBuffer.length) return; // stops learning until there are two samples in the price buffer
@@ -130,7 +134,6 @@ var strategy = {
     this.prevAction = event.action;
     // store the price of the previous trade
     this.prevPrice = event.price;
-
   },
 
   printObject: function(o) {
@@ -145,6 +148,10 @@ var strategy = {
   predictCandle: function() {
     let vol = new convnetjs.Vol(this.priceBuffer);
     let prediction = this.nn.forward(vol);
+
+    if (isFilewriterSet) {
+      this.saveNNConfig();
+    }
 
     return prediction.w[0];
   },
@@ -187,13 +194,21 @@ var strategy = {
     }
   },
 
-  end : function() {
-	log.debug("NN output to store: ", JSON.stringify(this.nn.toJSON()));
-	var fileoutput = JSON.stringify(this.nn.toJSON());
+  saveNNConfig: function() {
+    log.debug("Saving NN-Config.");
+    log.debug("NN output to store: ", JSON.stringify(this.nn.toJSON()));
+
+    var fileoutput = JSON.stringify(this.nn.toJSON());
     fs.writeFileSync(nndatafile, fileoutput, function (err) {
       if (err) throw err;
-        console.log('Learn state saved!');
-    });	  
+      console.log('Learn state saved!');
+    });       
+  },
+
+  end: function() {      
+    if (isFilewriterSet) {
+      this.saveNNConfig;
+    }
     log.debug('Triggered stoploss',this.stoplossCounter,'times');
   }
 

@@ -15,13 +15,21 @@ Install the modules in your gekko folder:
 
 # Usage / Configuration
 
-Add the following section to your config file:
+Add the following section to your config file, after `config.watch`:
 
-config.filewriter = {
-  nnfilepath: __dirname+"/nn_files/" //encure you have created gekko/nn_files folder
-};
+```javascript
+/// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       CONFIGURE FILEWRITER FOR NN
+/// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+config.filewriter = { 
+  nnfilepath: __dirname+'/nn_files/',
+  nnfile: 'trained_'+config.watch.asset+'.js',   
+}
+```
 
 For consoles setup create the following entry in your config file:
+
+```javascript
 config.zuki_nn = {
 	threshold_buy : 1.0,
 	threshold_sell : -1.0,
@@ -34,6 +42,7 @@ config.zuki_nn = {
 	price_buffer_len : 100,
 	min_predictions : 1000	
 }
+```
 
 
 If you use the UI then clone / rename it will reference the toml file, only thing you will then need to do is copy in the filewriter config. I don't use the ui so i haven't set that up.
